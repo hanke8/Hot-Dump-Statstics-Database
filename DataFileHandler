@@ -1,0 +1,65 @@
+#include <iostream>
+#include <string> 
+#include <fstream>
+#include "jsoncpp.cpp"
+#include "json/json.h"
+#include "json/json-forwards.h"
+using namespace std;
+
+//ifstream 磁盘->内存
+//ofstream 内存->磁盘 
+
+class DataFileHandler
+{
+private:
+	string path="";
+public:
+	void open(string fpath)
+	{
+		path=fpath;	  //打开一个文件，我的理解就是传入文件的地址（可能理解有误） 
+	}
+	
+	void append(string text)
+	{
+		ofstream out(path, ios::app|ios::binary); //ios::binary
+		out<<text;
+		out.close();
+	}
+	
+	void read_line(int n)
+	{
+		int i=1;
+		string str, s;
+		ifstream in(path, ios::binary);"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  "
+		while(i!=n && in)
+		{
+			in>>s;
+			cout<<s<<" ";
+			if(s=="\n") {cout<<"测试：这是新的一行。"<<endl; i++;}  //这里有些问题，好像读不到 "\n" 
+		}
+		if(i!=n){
+			cout<<"your input is illegal."<<endl;
+			return;
+		}
+		s = "";
+		while(s!="\n" && in)
+		{
+			in>>s;
+			str+=s;
+		}
+		cout<<str<<endl;
+	}
+	
+};
+
+//测试用例 
+int main(){
+	DataFileHandler f;
+	f.open("C:/Users/1/Desktop/test.dat");
+	f.append("name: hanke\n");
+	f.append("age: 19\n");
+	f.append("hobby: walking\n");
+	f.append("from: HuNan provin\n");
+	f.read_line(3);
+    return 0;
+}
