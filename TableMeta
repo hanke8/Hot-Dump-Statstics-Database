@@ -1,0 +1,137 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include "jsoncpp.cpp"
+#include "json/json.h"
+#include "json/json-forwards.h"
+using namespace std;
+
+class TableMeta
+{
+private:
+	vector<string> colName;
+	string tableName, primaryKey, savePath;
+public:
+	//元数据包括：表名、列名、主键、表文件存储路径等
+	TableMeta()
+	{
+		string c;
+		cout<<"Please input tableName: "; cin>>tableName;
+		while(1){
+			cout<<"Please input colName: ";
+			cin>>c; 
+			colName.push_back(c);
+			cout<<"0-stop inputing, 1-keep inputing: ";
+			cin>>c;
+			if(c=="0") {break;}
+		}
+		cout<<"Please input primaryKey: "; cin>>primaryKey;
+		cout<<"Please input save path: "; cin>>savePath;
+	}
+	
+	void save()
+	{
+		//根节点  
+		Json::Value root;
+	 
+		//根节点属性  
+		root["tableName"] = Json::Value(tableName);
+		for(int i=0; i<colName.size(); i++)
+		{
+			root["colName"].append(colName[i]);
+		}
+	//	root["colName"] = Json::Value(colName);
+		root["primaryKey"] = Json::Value(primaryKey);
+		root["savePath"] = Json::Value(savePath);
+	 
+	//	//子节点  
+	//	Json::Value friends;
+	// 
+	//	//子节点属性  
+	//	friends["friend_name"] = Json::Value("ZhaoWuxian");
+	//	friends["friend_age"] = Json::Value(21);
+	//	friends["friend_sex"] = Json::Value("man");
+	// 
+	//	//子节点挂到根节点上  
+	//	root["friends"] = Json::Value(friends);
+	// 
+	//	//数组形式  
+	//	root["hobby"].append("sing");
+	//	root["hobby"].append("run");
+	//	root["hobby"].append("Tai Chi");
+	 
+		//直接输出  
+		//cout << "FastWriter:" << endl;
+		//Json::FastWriter fw;
+		//cout << fw.write(root) << endl << endl;
+	 
+		//缩进输出  
+		cout << "StyledWriter:" << endl;
+		Json::StyledWriter sw;
+		cout << sw.write(root) << endl << endl;
+	 
+		//输出到文件  
+		ofstream os;
+		os.open(savePath, ios::out | ios::app);
+		if (!os.is_open())
+			cout << "error：can not find or create the file."<< endl;
+		os << sw.write(root);
+		cout << "save Complete!" << endl;
+		os.close();
+	}
+
+	void load()
+	{
+		Json::Reader reader;
+		Json::Value root;
+	 
+		//从文件中读取，保证当前文件有demo.json文件  
+		ifstream in(savePath, ios::binary);
+	 
+		if (!in.is_open())
+		{
+			cout << "Error opening file\n";
+			return;
+		}
+	 
+		if (reader.parse(in, root))
+		{
+			//读取根节点信息  
+			string tname = root["tableName"].asString();
+			cout << "Columns name are: " << endl;
+			for (int i = 0; i<root["colName"].size(); i++)
+			{
+				string c = root["colName"][i].asString();
+				cout << c << '\t';
+			}
+			cout << endl;
+			string pkey = root["primaryKey"].asString();
+			string spath = root["savePath"].asString();
+	 
+			cout << "Table name is " << tname << endl;
+			cout << "Columns name are: " << endl;
+			for (int i = 0; i<root["colName"].size(); i++)
+			{
+				string c = root["colName"][i].asString();
+				cout << c << '\t';
+			}
+			cout << endl;
+			cout << "Primary key is " << pkey << endl;
+			cout << "Save path is " << spath << endl;
+			cout << "load Complete!" << endl;
+		}
+		else {cout << "parse error\n" << endl;}
+		in.close();
+	}
+	
+};
+
+int main()
+{
+	TableMeta TM;
+	TM.save();
+	cout<<"**********************";
+	TM.load();
+	return 0;
+}
