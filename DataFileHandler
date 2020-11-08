@@ -28,26 +28,23 @@ public:
 	
 	void read_line(int n)
 	{
-		int i=1;
-		string str, s;
-		ifstream in(path, ios::binary);"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  "
-		while(i!=n && in)
+		int i=0;
+		string str;
+		ifstream in(path, ios::binary);
+		while(in)
 		{
-			in>>s;
-			cout<<s<<" ";
-			if(s=="\n") {cout<<"测试：这是新的一行。"<<endl; i++;}  //这里有些问题，好像读不到 "\n" 
+			i++;
+			getline(in,str);
+			if(i==n)
+			{
+				cout<<str<<endl;
+				break;
+			}
 		}
-		if(i!=n){
-			cout<<"your input is illegal."<<endl;
-			return;
-		}
-		s = "";
-		while(s!="\n" && in)
+		if(i<=n)
 		{
-			in>>s;
-			str+=s;
+			cout<<"The file doesn't have that many lines."<<endl;
 		}
-		cout<<str<<endl;
 	}
 	
 };
@@ -55,7 +52,7 @@ public:
 //测试用例 
 int main(){
 	DataFileHandler f;
-	f.open("C:/Users/1/Desktop/test.dat");
+	f.open("C:/Users/1/Desktop/test.txt");
 	f.append("name: hanke\n");
 	f.append("age: 19\n");
 	f.append("hobby: walking\n");
