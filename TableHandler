@@ -1,0 +1,47 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <stdio.h>
+#include "TableMeta.cpp"
+
+class TableHandler
+{
+private:
+	string tb_savePath;
+public:
+	TableHandler()
+	{
+		tb_savePath = "C:/Users/1/Desktop/MyDatabase/"; 
+	}
+	
+	void create(string databaseName, string tableName)
+	{
+		TableMeta TM(databaseName);
+		TM.save(tableName);
+	}
+	
+	void open(string databaseName, string tableName)
+	{
+		TableMeta TM(databaseName);
+		TM.getTableInfo(tableName);
+	}
+	
+	void drop(string databaseName, string tableName)
+	{
+		string path = tb_savePath + databaseName + "/" + tableName + ".bin";
+		if(remove(path.c_str())==0){
+			TableMeta tbmeta(databaseName);
+			tbmeta.drop(tableName);
+			cout<<"delete successfully!"<<endl;
+		}
+		else{
+			cout<<"fail to delete!"<<endl;
+		}
+	} 
+	
+	void getTableMeta(string databaseName)
+	{
+		TableMeta tbmeta(databaseName);
+		tbmeta.load();
+	}
+};
