@@ -1,0 +1,53 @@
+#include<iostream> 
+#include <string>
+#include <direct.h>
+#include "includeJson.cpp"
+#include "DBHandler.cpp"
+#include "TableHandler.cpp"
+#include "DataFileHandler.cpp"
+#include "TableRow.cpp"
+using namespace std;
+
+int main()
+{
+//	//建库 
+//	DBHandler dbhandler;
+//	dbhandler.create("db_2");
+//	
+//	//建表
+//	TableHandler tbhandler;
+//	tbhandler.create("db_2", "tb_3");
+//	
+//	//添加数据
+//	DataFileHandler dfhandler("db_1", "tb_1");
+//	dfhandler.append("Kevin,23,006");
+//	//读取数据
+//	dfhandler.read_line(2,2);
+
+//	//查看库名 
+//	DBHandler dbhandler;
+//	dbhandler.getDBMeta();
+
+//	//查看指定库里面有哪些表
+//	TableHandler tbhandler;
+//	tbhandler.getTableMeta("db_1");
+
+//	//查看某个表的元数据信息
+//	TableHandler tbhandler;
+//	tbhandler.open("db_2", "tb_3");
+
+//	//删除某个表
+//	TableHandler tbhandler;
+//	tbhandler.drop("db_2", "tb_3");
+
+//	//删除某个库
+//	DBHandler dbhandler;
+//	dbhandler.drop("db_2");
+
+//	//TableRow
+//	TableRow tbrow("db_1", "tb_1");
+//	tbrow.get_column("student_name");
+//	tbrow.read(2,2);
+//	tbrow.write("Nancy,22,007");
+	return 0;
+}
