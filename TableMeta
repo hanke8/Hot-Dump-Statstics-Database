@@ -1,137 +1,166 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <string>
-#include "jsoncpp.cpp"
-#include "json/json.h"
-#include "json/json-forwards.h"
 using namespace std;
 
 class TableMeta
-{
+{ //元数据包括：表名、列名、主键、表文件存储路径等
 private:
-	vector<string> colName;
-	string tableName, primaryKey, savePath;
+	string tb_savePath;
+	string tb_metaFileName;
+	string tb_metaFilePath;
 public:
-	//元数据包括：表名、列名、主键、表文件存储路径等
-	TableMeta()
+	//查看指定数据库的表的元数据 
+	TableMeta(string databaseName)
 	{
-		string c;
-		cout<<"Please input tableName: "; cin>>tableName;
-		while(1){
-			cout<<"Please input colName: ";
-			cin>>c; 
-			colName.push_back(c);
-			cout<<"0-stop inputing, 1-keep inputing: ";
-			cin>>c;
-			if(c=="0") {break;}
-		}
-		cout<<"Please input primaryKey: "; cin>>primaryKey;
-		cout<<"Please input save path: "; cin>>savePath;
+		tb_savePath = "C:/Users/1/Desktop/MyDatabase/" + databaseName + "/";
+		tb_metaFileName = "tableMeta.json";
+		tb_metaFilePath = tb_savePath  + tb_metaFileName;
 	}
 	
-	void save()
-	{
-		//根节点  
-		Json::Value root;
-	 
-		//根节点属性  
-		root["tableName"] = Json::Value(tableName);
-		for(int i=0; i<colName.size(); i++)
-		{
-			root["colName"].append(colName[i]);
-		}
-	//	root["colName"] = Json::Value(colName);
-		root["primaryKey"] = Json::Value(primaryKey);
-		root["savePath"] = Json::Value(savePath);
-	 
-	//	//子节点  
-	//	Json::Value friends;
-	// 
-	//	//子节点属性  
-	//	friends["friend_name"] = Json::Value("ZhaoWuxian");
-	//	friends["friend_age"] = Json::Value(21);
-	//	friends["friend_sex"] = Json::Value("man");
-	// 
-	//	//子节点挂到根节点上  
-	//	root["friends"] = Json::Value(friends);
-	// 
-	//	//数组形式  
-	//	root["hobby"].append("sing");
-	//	root["hobby"].append("run");
-	//	root["hobby"].append("Tai Chi");
-	 
-		//直接输出  
-		//cout << "FastWriter:" << endl;
-		//Json::FastWriter fw;
-		//cout << fw.write(root) << endl << endl;
-	 
-		//缩进输出  
-		cout << "StyledWriter:" << endl;
-		Json::StyledWriter sw;
-		cout << sw.write(root) << endl << endl;
-	 
-		//输出到文件  
-		ofstream os;
-		os.open(savePath, ios::out | ios::app);
-		if (!os.is_open())
-			cout << "error：can not find or create the file."<< endl;
-		os << sw.write(root);
-		cout << "save Complete!" << endl;
-		os.close();
-	}
-
+	//加载表名 
 	void load()
 	{
 		Json::Reader reader;
 		Json::Value root;
+		
+		ifstream in(tb_metaFilePath);
 	 
-		//从文件中读取，保证当前文件有demo.json文件  
-		ifstream in(savePath, ios::binary);
-	 
-		if (!in.is_open())
+		if (!in)
 		{
 			cout << "Error opening file\n";
 			return;
 		}
-	 
 		if (reader.parse(in, root))
 		{
-			//读取根节点信息  
-			string tname = root["tableName"].asString();
-			cout << "Columns name are: " << endl;
-			for (int i = 0; i<root["colName"].size(); i++)
+			cout << "Table name are: " << endl;
+			for (int i = 0; i<root.size(); i++)
 			{
-				string c = root["colName"][i].asString();
+				string c = root[i]["tableName"].asString();
 				cout << c << '\t';
 			}
 			cout << endl;
-			string pkey = root["primaryKey"].asString();
-			string spath = root["savePath"].asString();
-	 
-			cout << "Table name is " << tname << endl;
-			cout << "Columns name are: " << endl;
-			for (int i = 0; i<root["colName"].size(); i++)
-			{
-				string c = root["colName"][i].asString();
-				cout << c << '\t';
-			}
-			cout << endl;
-			cout << "Primary key is " << pkey << endl;
-			cout << "Save path is " << spath << endl;
 			cout << "load Complete!" << endl;
 		}
 		else {cout << "parse error\n" << endl;}
 		in.close();
 	}
 	
+	//每次保存一个表的meta
+	void save(string tableName)
+	{	
+		Json::Reader reader;
+    	Json::Value root;
+		Json::StyledWriter writer;
+	    Json::Value table;
+	    
+	    //如果文件已存在，则数据会被解析到root(这样就能在末尾写入数据) 
+		ifstream in(tb_metaFilePath);
+//		if (in)
+////		{	 
+//			if (!reader.parse(in, root))
+//			{
+//				cout << "parse error\n" << endl;
+//			}
+//			in.close();
+//		}
+		reader.parse(in, root);
+		in.close();
+		
+		//如果表已经存在则不创建 
+		for(int i=0; i<root.size(); i++)
+		{
+			if(root[i]["tableName"]==tableName)
+			{
+				cout<<"this table already exists."<<endl; 
+				return;  
+			}
+		}
+		
+		string str;
+		string table_path;
+		
+		//表名 
+		table["tableName"] = tableName;
+		
+		//表存储路径
+		table_path = tb_savePath + tableName + ".bin";
+    	table["tablePath"] = table_path;
+    	
+    	//主键 
+    	cout<<"please input the primaryKey: ";
+		cin>>str;
+    	table["primaryKey"] = str;
+    	
+    	//列名 
+    	cout<<"please input the column name, and end with '#' "<<endl;
+    	cout<<"(such as: name age weight #)"<<endl;
+    	cout<<"input column name: ";
+		while(1)
+		{
+			cin>>str;
+			if(str=="#") {break;}
+			table["colName"].append(str);
+		}
+    	
+    	root.append(table);
+    	
+    	ofstream out(tb_metaFilePath);
+    	out << writer.write(root);
+    	out.close();
+    	cout << "save Complete!" << endl;
+    	
+    	//建立表的.bin(二进制)文件
+    	ofstream outfile(table_path);
+		outfile.close();
+	}
+	
+	void drop(string tableName)
+	{
+		Json::Reader reader;
+		Json::StyledWriter writer;
+    	Json::Value root1, root2;
+    	
+    	ifstream in(tb_metaFilePath);
+		if (!reader.parse(in, root1))
+		{
+			cout << "parse error\n" << endl;
+			in.close();
+			return;
+		}
+		in.close();
+		
+		for(int i=0; i<root1.size(); i++)
+		{
+			if(root1[i]["tableName"]!=tableName)
+			{
+				root2.append(root1[i]);
+			}
+		}
+		
+		ofstream out(tb_metaFilePath);
+    	out << writer.write(root2);
+    	out.close();
+	}
+	
+	void getTableInfo(string tableName)
+	{
+		Json::Reader reader;
+		Json::Value root;
+		
+		ifstream in(tb_metaFilePath);
+		reader.parse(in, root);
+		in.close();
+		
+		for(int i=0; i<root.size(); i++)
+		{
+			if(root[i]["tableName"]==tableName)
+			{
+				cout<<root[i]<<endl;
+				return;
+			} 
+		}
+		cout<<"not find such table."<<endl;
+	}
+	
 };
-
-int main()
-{
-	TableMeta TM;
-	TM.save();
-	cout<<"**********************";
-	TM.load();
-	return 0;
-}
