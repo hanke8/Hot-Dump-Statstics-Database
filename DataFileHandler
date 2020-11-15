@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string> 
 #include <fstream>
-#include "jsoncpp.cpp"
-#include "json/json.h"
-#include "json/json-forwards.h"
+//#include "jsoncpp.cpp"
+//#include "json/json.h"
+//#include "json/json-forwards.h
 using namespace std;
 
 //ifstream 磁盘->内存
@@ -12,51 +12,105 @@ using namespace std;
 class DataFileHandler
 {
 private:
-	string path="";
+	string databaseName;
+	string tableName;
+	string df_savePath;
 public:
-	void open(string fpath)
+	DataFileHandler(string dbName, string tbName)
 	{
-		path=fpath;	  //打开一个文件，我的理解就是传入文件的地址（可能理解有误） 
+		databaseName = dbName;
+		tableName = tbName;
+		df_savePath = "C:/Users/1/Desktop/MyDatabase/" + databaseName + "/" + tableName + ".bin"; 
 	}
+	
+//	void open(string fpath)
+//	{
+//		df_savePath=fpath;	  //打开一个文件，我的理解就是传入文件的地址（可能理解有误） 
+//	}
 	
 	void append(string text)
 	{
-		ofstream out(path, ios::app|ios::binary); //ios::binary
-		out<<text;
+		ofstream out(df_savePath, ios::app|ios::binary);
+		out<<"\n"<<text;
 		out.close();
+		cout << "write Complete!" << endl;
 	}
 	
-	void read_line(int n)
+	void read_line(int startLine, int lineNums=1)
 	{
-		int i=0;
+		int i=0, flag=0;
 		string str;
-		ifstream in(path, ios::binary);
+		ifstream in(df_savePath, ios::binary);
 		while(in)
 		{
 			i++;
 			getline(in,str);
-			if(i==n)
+			
+			if(startLine==-1)  //-1代表读取所有行 
+			{
+				do
+				{
+					cout<<str<<endl;
+					getline(in,str);	
+				}while(in);
+				return;
+			}
+			
+			if(i==startLine)
 			{
 				cout<<str<<endl;
-				break;
+				startLine++;
+				flag++;
+				if(flag==lineNums) {return;}
 			}
 		}
-		if(i<=n)
+		if(i<=startLine && flag==0)
 		{
-			cout<<"The file doesn't have that many lines."<<endl;
+			cout<<"The file doesn't have such line."<<endl;
 		}
 	}
 	
+	void read_col(string colName)
+	{
+		Json::Reader reader;
+		Json::Value root;
+		
+		string tb_metaFilePath = "C:/Users/1/Desktop/MyDatabase/" + databaseName + "/tableMeta.json";
+		ifstream in(tb_metaFilePath);
+		reader.parse(in, root);
+		in.close();
+		
+		for(int i=0; i<root.size(); i++)
+		{
+			if(root[i]["tableName"]==tableName)
+			{
+				for(int j=0; j<root[i]["colName"].size(); j++)
+				{
+					if(root[i]["colName"][j]==colName)
+					{
+						string str;
+						ifstream in(df_savePath, ios::binary);
+						getline(in,str);
+						while(in)
+						{
+							for(int k=0, flag=0; k<str.length(); k++)
+							{
+								if(flag==j && str[k]!=',')
+								{
+									cout<<str[k];
+								}
+								if(str[k]==','){flag++;}
+							}
+							getline(in,str);
+							cout<<"\n";
+						}
+						cout<<endl;
+						return;
+					}
+				}
+			} 
+		}
+		cout<<"not find such column."<<endl;
+	}
+	
 };
-
-//测试用例 
-int main(){
-	DataFileHandler f;
-	f.open("C:/Users/1/Desktop/test.txt");
-	f.append("name: hanke\n");
-	f.append("age: 19\n");
-	f.append("hobby: walking\n");
-	f.append("from: HuNan provin\n");
-	f.read_line(3);
-    return 0;
-}
