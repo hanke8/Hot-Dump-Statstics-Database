@@ -1,0 +1,35 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+class TableRow
+{
+private:
+	string databaseName;
+	string tableName;
+public:
+	TableRow(string dbName, string tbName)
+	{
+		databaseName = dbName;
+		tableName = tbName;
+	}
+	
+	void write(string text)
+	{
+		DataFileHandler dfhandler(databaseName, tableName);
+		dfhandler.append(text);
+	}
+	
+	void read(int startLine, int lineNums)
+	{
+		DataFileHandler dfhandler(databaseName, tableName);
+		dfhandler.read_line(startLine, lineNums);
+	}
+	
+	void get_column(string colName)
+	{
+		DataFileHandler dfhandler(databaseName, tableName);
+		dfhandler.read_col(colName);
+	}
+};
