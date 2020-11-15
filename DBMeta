@@ -1,0 +1,120 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <direct.h>
+//#include "jsoncpp.cpp"
+//#include "json/json.h"
+//#include "json/json-forwards.h
+using namespace std;
+
+class DBMeta
+{
+private:
+	string db_savePath;
+	string db_metaFileName;
+	string db_metaFilePath;
+public:
+	//默认存储地址 
+	DBMeta()
+	{
+		db_savePath = "C:/Users/1/Desktop/MyDatabase/";
+		db_metaFileName =  "databasebMeta.json";
+		db_metaFilePath = db_savePath + db_metaFileName;
+	}
+	
+//	//用户指定存储地址 
+//	DBMeta(string path)
+//	{
+//		db_savePath = path;
+//		db_metaFileName = "databaseMeta.json";
+//		db_metaFilePath = db_savePath + db_metaFileName;
+//	}
+	
+	//加载数据库名 
+	void load()
+	{
+		Json::Reader reader;
+		Json::Value root;
+		
+		ifstream in(db_metaFilePath);
+		if (!in)
+		{
+			cout<<"Error opening file"<<endl;
+			return;
+		}
+		if (reader.parse(in, root))
+		{
+			cout << "DataBase name are: " << endl;
+			for (int i = 0; i<root.size(); i++)
+			{
+				string c = root[i]["dbName"].asString();
+				cout << c << '\t';
+			}
+			cout << endl;
+			cout << "load Complete!" << endl;
+		}
+		else {cout << "parse error\n" << endl;}
+		in.close();
+	}
+	
+	//每次保存一个数据库的meta 
+	void save(string databaseName)
+	{	
+		Json::Reader reader;
+    	Json::Value root;
+		Json::StyledWriter writer;
+	    Json::Value db;
+	    
+		//如果文件已存在，则数据会被解析到root(这样就能在末尾写入数据) 
+		ifstream in(db_metaFilePath);
+//		if (in)
+//		{	
+//			if (!reader.parse(in, root))
+//			{
+//				cout << "parse error\n" << endl;
+//			}
+//			in.close();
+//		}
+		reader.parse(in, root);
+		in.close();
+		
+		db["dbName"] = databaseName;
+    	db["dbPath"] = db_savePath + databaseName;
+    	root.append(db);
+    	
+    	ofstream out(db_metaFilePath);
+    	out << writer.write(root);
+    	out.close();
+    	cout << "save Complete!" << endl;
+	}
+	
+	//从元数据中删除某个库信息 
+	void drop(string databaseName)
+	{
+		Json::Reader reader;
+		Json::StyledWriter writer;
+    	Json::Value root1, root2;
+    	
+    	ifstream in(db_metaFilePath);
+		if (!reader.parse(in, root1))
+		{
+			cout << "parse error\n" << endl;
+			in.close();
+			return;
+		}
+		in.close();
+		
+		for(int i=0; i<root1.size(); i++)
+		{
+			if(root1[i]["dbName"]!=databaseName)
+			{
+				root2.append(root1[i]);
+			}
+		}
+		
+		ofstream out(db_metaFilePath);
+    	out << writer.write(root2);
+    	out.close();
+	}
+	
+};
