@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <direct.h>
-#include "DBMeta.cpp" 
+#include "DBMeta.cpp"
 using namespace std;
 
 class DBHandler
@@ -16,16 +16,7 @@ public:
 		db_savePath = "C:/Users/1/Desktop/MyDatabase/";
 		mkdir(db_savePath.c_str());  //建立总库文件夹 
 	}
-	
-//	//用户指定存储路径 
-//	DBHandler(string path)
-//	{
-//		db_savePath = path;
-//		mkdir(path.c_str());
-//		ofstream out(path+"databaseMeta.json");
-//		out.close();
-//	}
-	
+		
 	//创建库 
 	void create(string databaseName)
 	{		
@@ -43,6 +34,9 @@ public:
 		{
 			cout<<"this database already exists."<<endl;;
 		}
+		
+//		TableMeta TM(databaseName);
+//		TM.save("Log"); //生成log文件 
 	}
 	
 	//打开指定库，若不存在则创建 
@@ -76,11 +70,6 @@ public:
 		DBMeta dbmeta;
 		dbmeta.load(); 
 	}
-	
-//	string getSavePath()
-//	{
-//		return db_savePath;
-//	}
 	
 };
 
