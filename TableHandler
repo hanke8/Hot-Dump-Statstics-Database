@@ -2,7 +2,8 @@
 #include <fstream>
 #include <string>
 #include <stdio.h>
-#include "TableMeta.cpp"
+#include <vector>
+#include "TableMeta.cpp" 
 
 class TableHandler
 {
@@ -14,18 +15,21 @@ public:
 		tb_savePath = "C:/Users/1/Desktop/MyDatabase/"; 
 	}
 	
-	void create(string databaseName, string tableName)
+	//在指定库中建表 
+	void create(string databaseName, string tableName, vector<string> cols) //vector存列名 
 	{
 		TableMeta TM(databaseName);
-		TM.save(tableName);
+		TM.save(tableName, cols);
 	}
 	
+	//打开指定库中的指定表 
 	void open(string databaseName, string tableName)
 	{
 		TableMeta TM(databaseName);
 		TM.getTableInfo(tableName);
 	}
 	
+	//删除某个库中的某个表 
 	void drop(string databaseName, string tableName)
 	{
 		string path = tb_savePath + databaseName + "/" + tableName + ".bin";
@@ -39,6 +43,7 @@ public:
 		}
 	} 
 	
+	//获取指定库中有哪些表 
 	void getTableMeta(string databaseName)
 	{
 		TableMeta tbmeta(databaseName);
