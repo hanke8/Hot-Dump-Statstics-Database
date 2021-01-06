@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
+//#include "includeJson.cpp"
 using namespace std;
 
 class TableMeta
@@ -47,7 +49,7 @@ public:
 	}
 	
 	//每次保存一个表的meta
-	void save(string tableName)
+	void save(string tableName, vector<string> cols) //vector里面是列名 
 	{	
 		Json::Reader reader;
     	Json::Value root;
@@ -56,14 +58,6 @@ public:
 	    
 	    //如果文件已存在，则数据会被解析到root(这样就能在末尾写入数据) 
 		ifstream in(tb_metaFilePath);
-//		if (in)
-////		{	 
-//			if (!reader.parse(in, root))
-//			{
-//				cout << "parse error\n" << endl;
-//			}
-//			in.close();
-//		}
 		reader.parse(in, root);
 		in.close();
 		
@@ -77,7 +71,6 @@ public:
 			}
 		}
 		
-		string str;
 		string table_path;
 		
 		//表名 
@@ -88,21 +81,14 @@ public:
     	table["tablePath"] = table_path;
     	
     	//主键 
-    	cout<<"please input the primaryKey: ";
-		cin>>str;
-    	table["primaryKey"] = str;
+    	table["primaryKey"] = cols[0];
     	
     	//列名 
-    	cout<<"please input the column name, and end with '#' "<<endl;
-    	cout<<"(such as: name age weight #)"<<endl;
-    	cout<<"input column name: ";
-		while(1)
-		{
-			cin>>str;
-			if(str=="#") {break;}
-			table["colName"].append(str);
+    	for(int i=0; i<cols.size(); i++)
+    	{
+    		table["colName"].append(cols[i]);
 		}
-    	
+		
     	root.append(table);
     	
     	ofstream out(tb_metaFilePath);
@@ -115,6 +101,68 @@ public:
 		outfile.close();
 	}
 	
+//	//每次保存一个表的meta
+//	void save(string tableName)
+//	{	
+//		Json::Reader reader;
+//    	Json::Value root;
+//		Json::StyledWriter writer;
+//	    Json::Value table;
+//	    
+//	    //如果文件已存在，则数据会被解析到root(这样就能在末尾写入数据) 
+//		ifstream in(tb_metaFilePath);
+//		reader.parse(in, root);
+//		in.close();
+//		
+//		//如果表已经存在则不创建 
+//		for(int i=0; i<root.size(); i++)
+//		{
+//			if(root[i]["tableName"]==tableName)
+//			{
+//				cout<<"this table already exists."<<endl; 
+//				return;  
+//			}
+//		}
+//		
+//		string str;
+//		string table_path;
+//		
+//		//表名 
+//		table["tableName"] = tableName;
+//		
+//		//表存储路径
+//		table_path = tb_savePath + tableName + ".bin";
+//    	table["tablePath"] = table_path;
+//    	
+//    	//主键 
+//    	cout<<"please input the primaryKey: ";
+//		cin>>str;
+//    	table["primaryKey"] = str;
+//    	
+//    	//列名 
+//    	cout<<"please input the column name, and end with '#' "<<endl;
+//    	cout<<"(such as: name age weight #)"<<endl;
+//    	cout<<"input column name: ";
+//		while(1)
+//		{
+//			cin>>str;
+//			if(str=="#") {break;}
+//			table["colName"].append(str);
+//		}
+//    	
+//    	root.append(table);
+//    	
+//    	ofstream out(tb_metaFilePath);
+//    	out << writer.write(root);
+//    	out.close();
+//    	cout << "save Complete!" << endl;
+//    	
+//    	//建立表的.bin(二进制)文件
+//    	ofstream outfile(table_path);
+//		outfile.close();
+//	}
+	
+	//在meta文件中删除表的信息
 	void drop(string tableName)
 	{
 		Json::Reader reader;
@@ -143,6 +191,7 @@ public:
     	out.close();
 	}
 	
+	//获取表的meta信息 
 	void getTableInfo(string tableName)
 	{
 		Json::Reader reader;
