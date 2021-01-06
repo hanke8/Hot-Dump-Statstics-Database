@@ -2,9 +2,7 @@
 #include <fstream>
 #include <string>
 #include <direct.h>
-//#include "jsoncpp.cpp"
-//#include "json/json.h"
-//#include "json/json-forwards.h
+//#include "includeJson.cpp"
 using namespace std;
 
 class DBMeta
@@ -21,14 +19,6 @@ public:
 		db_metaFileName =  "databasebMeta.json";
 		db_metaFilePath = db_savePath + db_metaFileName;
 	}
-	
-//	//用户指定存储地址 
-//	DBMeta(string path)
-//	{
-//		db_savePath = path;
-//		db_metaFileName = "databaseMeta.json";
-//		db_metaFilePath = db_savePath + db_metaFileName;
-//	}
 	
 	//加载数据库名 
 	void load()
@@ -67,14 +57,6 @@ public:
 	    
 		//如果文件已存在，则数据会被解析到root(这样就能在末尾写入数据) 
 		ifstream in(db_metaFilePath);
-//		if (in)
-//		{	
-//			if (!reader.parse(in, root))
-//			{
-//				cout << "parse error\n" << endl;
-//			}
-//			in.close();
-//		}
 		reader.parse(in, root);
 		in.close();
 		
