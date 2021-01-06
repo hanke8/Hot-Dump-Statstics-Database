@@ -1,0 +1,76 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include "AVLTree.cpp"
+#include "DataFileHandler.cpp"
+using namespace std;
+
+class DataHot
+{
+private:
+	string databaseName;
+	string Log_path;
+	vector<int> hotData_vec;
+	AVLTree<int> hotData_tree;
+public:
+	DataHot(string dbName)
+	{
+		databaseName = dbName;
+		Log_path = "C:/Users/1/Desktop/MyDatabase/"+databaseName+"/Log.bin";
+		//建立log文件
+    	ofstream outfile(Log_path, ios::app);
+		outfile.close();
+	}
+	
+	//获取log文件的总行数 
+	int getLogFileLine() 
+	{
+		DataFileHandler df(databaseName, "Log");
+		return df.getlines();
+	}
+	
+	//载入log文件的数据 
+	vector<int> load(int startLine, int lines=1) //载入log文件到数据
+	{
+		DataFileHandler df(databaseName, "Log");
+		return df.read_line(startLine, lines);
+	}
+
+	//在AVLTree中插入热数据，维护索引 
+	void insert(int primaryKey, vector<int> row_data, bool writeIntoLog=false) //第二个参数是一行数据(含primaryKey) 
+	{
+		if(writeIntoLog==true)
+		{
+			string str;
+			for(int i=0; i<row_data.size(); i++)
+			{
+				str += to_string(row_data[i]);
+				if(i!=row_data.size()-1)
+					str += ",";	
+			}
+			DataFileHandler df(databaseName, "Log");
+			df.append(str);                  //先把热数据写如log文件中 	
+		}
+		
+		hotData_tree.insert(primaryKey, row_data);   //再建索引 
+	}
+	
+	//在AVLTree中查询热数据 
+	vector<int> find(int primaryKey)
+	{
+		return hotData_tree.find(primaryKey);
+	}
+	
+//	int* begin() //遍历热数据
+//	{
+//		hot_data = load();
+//		return hot_data.begin();
+//	}
+//	
+//	int* end() //遍历热数据
+//	{
+//		hot_data = load();
+//		return hot_data.end();
+//	}
+	
+};
