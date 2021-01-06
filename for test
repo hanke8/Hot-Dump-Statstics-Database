@@ -1,53 +1,169 @@
 #include<iostream> 
 #include <string>
 #include <direct.h>
+#include <vector>
 #include "includeJson.cpp"
-#include "DBHandler.cpp"
-#include "TableHandler.cpp"
-#include "DataFileHandler.cpp"
-#include "TableRow.cpp"
+#include "DataHot.cpp"
+//#include "DBHandler.cpp"
+//#include "TableHandler.cpp"
+//#include "DataFileHandler.cpp"
+#include <time.h>
 using namespace std;
 
-int main()
-{
+//void create()
+//{
+//	vector<string> cols;
+//	cols.push_back("student_id");
+//	cols.push_back("math_score");
+//	cols.push_back("Chinese_score");
+//	cols.push_back("English_score");
+//	
 //	//建库 
 //	DBHandler dbhandler;
-//	dbhandler.create("db_2");
+//	dbhandler.create("SE-01");  //库名 
 //	
 //	//建表
 //	TableHandler tbhandler;
-//	tbhandler.create("db_2", "tb_3");
-//	
-//	//添加数据
-//	DataFileHandler dfhandler("db_1", "tb_1");
-//	dfhandler.append("Kevin,23,006");
-//	//读取数据
-//	dfhandler.read_line(2,2);
+//	tbhandler.create("SE-01", "Discrete Mathematics", cols);  //库名，表名 	
+//}
 
+//void insert(int dataNums)
+//{
+//	//添加数据
+//	string data; 
+//	srand((unsigned)time(NULL));
+//	
+//	DataFileHandler dfhandler("SE-01", "Discrete Mathematics");  //库名，表名
+//	
+//	for(int j=0; j<dataNums; j++)
+//	{
+//		
+//		data = to_string(rand()%101);        //随机生成score 
+//		dfhandler.append(data);          //一行数据 
+//	}
+//
+//}
+//
+//void read(string dbName, string tbName, int startLine, int lineNums)
+//{
+//	DataFileHandler dfhandler(dbName, tbName);  //库名，表名
+//	
+//	//读取数据
+//	vector<int> vec;
+//	vec = dfhandler.read_line(startLine,lineNums);   //开始读取的行数(-1代表读取所有行)，读取的行的数目(默认为1)
+//	
+//	for(int i=0; i<vec.size(); i++)
+//	{
+//		if(i>0 && i%4==0)
+//			cout<<endl;
+//		cout<<vec[i]<<" ";
+//	}
+//
+//}
+
+int main()
+{
+	
+//	DBHandler dbhandeler;
+//	dbhandeler.create("db_1");  //建库 
+//	dbhandeler.create("db_2");  //建库 
+//	create(cols);  //建库 
+	
+//	//建表
+//	vector<string> cols;
+//	cols.push_back("student_id");
+//	cols.push_back("math_score");
+//	cols.push_back("Chinese_score");
+//	cols.push_back("English_score");
+//	
+//	TableHandler tbhandler;
+//	tbhandler.create("db_1", "tb_1", cols);  //库名，表名
+//	tbhandler.create("db_1", "tb_2", cols);  //库名，表名
+	
+//	//插入数据
+//	DataFileHandler dfhandler("db_1", "tb_1");  //库名，表名
+//	dfhandler.append("2019112001,87,94,79");
+//	dfhandler.append("2019112003,82,74,97");
+//	dfhandler.append("2019112020,69,78,62");
+//	insert(3*4);  //插入数据 
+
+//	//读取数据 
+//	vector<int> v;
+//	DataFileHandler dfhandler("db_1", "tb_1");  //库名，表名
+//	v = dfhandler.read_col("math_score");  //读取数据 
+//	for(int i=0; i<v.size(); i++)
+//	{
+//		cout<<v[i]<<endl;
+//	}
+	
+	
 //	//查看库名 
 //	DBHandler dbhandler;
 //	dbhandler.getDBMeta();
 
 //	//查看指定库里面有哪些表
 //	TableHandler tbhandler;
-//	tbhandler.getTableMeta("db_1");
+//	tbhandler.getTableMeta("db_1");   //参数为库名 
 
 //	//查看某个表的元数据信息
 //	TableHandler tbhandler;
-//	tbhandler.open("db_2", "tb_3");
+//	tbhandler.open("db_1", "tb_2");
 
 //	//删除某个表
 //	TableHandler tbhandler;
-//	tbhandler.drop("db_2", "tb_3");
+//	tbhandler.drop("db_1", "tb_2");
 
 //	//删除某个库
 //	DBHandler dbhandler;
-//	dbhandler.drop("db_2");
+//	dbhandler.drop("db_1");
 
+//	//热数据
+//	vector<int> data1, data2, data3, v;
+//	data1.push_back(2019112001);
+//	data1.push_back(98);
+//	data1.push_back(78);
+//	data1.push_back(86);
+//	
+//	data2.push_back(2019112007);
+//	data2.push_back(88);
+//	data2.push_back(71);
+//	data2.push_back(98);
+//	
+//	data3.push_back(2019112003);
+//	data3.push_back(69);
+//	data3.push_back(73);
+//	data3.push_back(99);
+//	
+//	//插入到AVLTree 
+//	DataHot hot("db_2");
+//	hot.insert(data1[0],data1,true);
+//	hot.insert(data2[0],data2,true);
+//	hot.insert(data3[0],data3,true);
+//	
+//	//在AVLTree上查询 
+//	cout<<"find id=2019112003"<<endl;
+//	v=hot.find(2019112003);
+//	for(int i=0; i<v.size(); i++)
+//		cout<<v[i]<<" ";
+//	cout<<endl;
+//	
+//	cout<<"find id=2019112007"<<endl;
+//	v=hot.find(2019112007);
+//	for(int i=0; i<v.size(); i++)
+//		cout<<v[i]<<" ";
+//	cout<<endl;
+	
+	//log文件
+	vector<int> v;
+	DataHot hot("db_2");
+	v = hot.load(1,-1); //导入log文件的数据 
+	for(int i=0; i<v.size(); i++)
+		cout<<v[i]<<" ";
+	
 //	//TableRow
-//	TableRow tbrow("db_1", "tb_1");
-//	tbrow.get_column("student_name");
-//	tbrow.read(2,2);
-//	tbrow.write("Nancy,22,007");
+//	TableRow tbrow("SE-01", "Discrete Mathematics");
+//	tbrow.get_column("name");
+//	tbrow.read(1,1);
+//	tbrow.write("2019112001,Kevin,male,87");
 	return 0;
 }
