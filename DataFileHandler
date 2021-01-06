@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string> 
 #include <fstream>
-//#include "jsoncpp.cpp"
-//#include "json/json.h"
-//#include "json/json-forwards.h
+#include <vector>
+//#include "includeJson.cpp"
 using namespace std;
 
 //ifstream 磁盘->内存
@@ -15,63 +14,109 @@ private:
 	string databaseName;
 	string tableName;
 	string df_savePath;
+	int total_lines; 
+//	int colNums;
 public:
 	DataFileHandler(string dbName, string tbName)
 	{
 		databaseName = dbName;
 		tableName = tbName;
-		df_savePath = "C:/Users/1/Desktop/MyDatabase/" + databaseName + "/" + tableName + ".bin"; 
+		df_savePath = "C:/Users/1/Desktop/MyDatabase/" + databaseName + "/" + tableName + ".bin";
+//		colNums = getColNums();
 	}
 	
-//	void open(string fpath)
-//	{
-//		df_savePath=fpath;	  //打开一个文件，我的理解就是传入文件的地址（可能理解有误） 
-//	}
-	
-	void append(string text)
+	int getlines()  //获取文件的总行数 
 	{
-		ofstream out(df_savePath, ios::app|ios::binary);
-		out<<"\n"<<text;
+		int colNums = 4; //默认为4 
+		ifstream in(df_savePath, ios::binary|ios::ate);
+		total_lines = in.tellg()/(colNums*sizeof(int));
+		in.close();
+		return total_lines; 
+	}
+	
+	int getColNums()  //获取列数 
+	{
+		Json::Reader reader;
+		Json::Value root;
+		
+		string tb_metaFilePath = "C:/Users/1/Desktop/MyDatabase/" + databaseName + "/tableMeta.json";
+		ifstream in(tb_metaFilePath);
+		reader.parse(in, root);
+		in.close();
+		
+		for(int i=0; i<root.size(); i++)
+		{
+			if(root[i]["tableName"]==tableName)
+			{
+				return root[i]["colName"].size();
+			}
+		}
+		return 4;  //默认是4，给log文件使用 
+	}
+	
+	void append(string text)  //传入的数据之间需要用 ","隔开 
+	{
+		int data;
+		int size=text.length();
+		string str="";
+		ofstream out(df_savePath, ios::binary|ios::app);
+		
+		for(int i=0; i<size; i++)
+		{
+			if(text[i]!=',')
+			{
+				str += text[i];
+			}
+			if(text[i]==',' || i==size-1)
+			{
+				data = stoi(str);
+				str = "";
+				out.write((char*)&data, sizeof(int));
+			}
+		}
 		out.close();
 		cout << "write Complete!" << endl;
 	}
+
+	vector<int> read_line(int startLine, int readLines, int colNums=4)  //读取行数据，返回一个vector 
+	{		
 	
-	void read_line(int startLine, int lineNums=1)
-	{
-		int i=0, flag=0;
-		string str;
-		ifstream in(df_savePath, ios::binary);
-		while(in)
+		vector<int> vec;
+		int buffer;
+		ifstream in(df_savePath, ios::binary|ios::ate);
+		total_lines = in.tellg()/(colNums*sizeof(int));
+
+		if(startLine<1 || startLine>total_lines)
 		{
-			i++;
-			getline(in,str);
-			
-			if(startLine==-1)  //-1代表读取所有行 
-			{
-				do
-				{
-					cout<<str<<endl;
-					getline(in,str);	
-				}while(in);
-				return;
-			}
-			
-			if(i==startLine)
-			{
-				cout<<str<<endl;
-				startLine++;
-				flag++;
-				if(flag==lineNums) {return;}
-			}
+			startLine = 1;
 		}
-		if(i<=startLine && flag==0)
+	
+		if(readLines == -1 || readLines>total_lines)    //readLines=-1, 读取全部行
 		{
-			cout<<"The file doesn't have such line."<<endl;
+			readLines = total_lines*colNums;
 		}
+		else if(readLines<1)
+		{
+			readLines = colNums;	
+		}
+		else
+		{
+			readLines *= colNums; 
+		}
+		int offset = (startLine-1)*colNums*sizeof(int);
+		in.seekg(offset, ios::beg);    //把指针移到要读的那一行 
+		for(int i=0; i<readLines; i++)
+		{
+			in.read((char*)&buffer, sizeof(int));
+			vec.push_back(buffer);
+		}
+		in.close();
+		return vec;
 	}
 	
-	void read_col(string colName)
+	vector<int> read_col(string colName)  //读取列数据，返回一个vector 
 	{
+		vector<int> vec;
 		Json::Reader reader;
 		Json::Value root;
 		
@@ -87,25 +132,23 @@ public:
 				for(int j=0; j<root[i]["colName"].size(); j++)
 				{
 					if(root[i]["colName"][j]==colName)
-					{
-						string str;
-						ifstream in(df_savePath, ios::binary);
-						getline(in,str);
-						while(in)
+					{	
+						int buffer;
+						int offset = (root[i]["colName"].size()-1) * sizeof(int);
+						ifstream in(df_savePath, ios::binary|ios::ate);
+						int size = in.tellg();
+						in.seekg(j*sizeof(int), ios::beg);
+						int current_pos = in.tellg();
+						
+						while(current_pos<size)
 						{
-							for(int k=0, flag=0; k<str.length(); k++)
-							{
-								if(flag==j && str[k]!=',')
-								{
-									cout<<str[k];
-								}
-								if(str[k]==','){flag++;}
-							}
-							getline(in,str);
-							cout<<"\n";
+							in.read((char*)&buffer, sizeof(int));
+							vec.push_back(buffer);
+							in.seekg(offset, ios::cur);
+							current_pos = in.tellg();
 						}
-						cout<<endl;
-						return;
+						in.close();
+						return vec;
 					}
 				}
 			} 
