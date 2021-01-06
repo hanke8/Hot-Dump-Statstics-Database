@@ -1,0 +1,59 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include "AVLTree.cpp"
+#include "DataFileHandler.cpp"
+using namespace std;
+
+class DataCold 
+{
+private:
+	string databaseName;
+	string tableName;
+	string coldfile_path;
+	vector<int> coldData_vec;
+	AVLTree<int> coldData_tree;
+public:
+	DataCold(string dbName, string tbName)
+	{
+		databaseName = dbName;
+		tableName = tbName;
+		coldfile_path = "C:/Users/1/Desktop/MyDatabase/"+databaseName+"/"+tableName+".bin";
+	}
+	
+	int getColdFileLine()   //获取冷数据的行数 
+	{
+		DataFileHandler df(databaseName, tableName);
+		return df.getlines();
+	}
+	
+	vector<int> load(int startLine, int lines=1) //载入冷数据
+	{
+		DataFileHandler df(databaseName, tableName);
+		return df.read_line(startLine, lines);
+	}
+
+	
+	void insert(int primaryKey, vector<int> row_data) //第二个参数是一行数据(含primaryKey) 
+	{
+		coldData_tree.insert(primaryKey, row_data);   //冷数据建索引 
+	}
+	
+	vector<int> find(int primaryKey)
+	{
+		return coldData_tree.find(primaryKey);
+	}
+	
+//	int* begin() //遍历冷数据
+//	{
+//		hot_data = load();
+//		return hot_data.begin();
+//	}
+//	
+//	int* end() //遍历冷数据
+//	{
+//		hot_data = load();
+//		return hot_data.end();
+//	}
+	
+};
